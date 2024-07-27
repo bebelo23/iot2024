@@ -180,6 +180,91 @@ async def delete_student(student_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"detail": "Student deleted successfully"}
 
+#coffee part
+@router_v1.get('/coffees')
+async def get_coffee(db: Session = Depends(get_db)):
+    return db.query(models.Coffee).all()
+
+@router_v1.get('/coffees/{coffee_id}')
+async def get_coffee(coffee_id: int, db: Session = Depends(get_db)):
+    return db.query(models.Coffee).filter(models.Coffee.id == coffee_id).first()
+
+@router_v1.post('/coffees')
+async def create_coffee(coffee: dict, response: Response, db: Session = Depends(get_db)):
+    new_coffee = models.Coffee(name=coffee['name'], description=coffee['description'], price=coffee['price'])
+    db.add(new_coffee)
+    db.commit()
+    db.refresh(new_coffee)
+    response.status_code = 201
+    return new_coffee
+
+@router_v1.patch('/coffees/{coffee_id}')
+async def update_coffee(coffee_id: int, coffee: dict, db: Session = Depends(get_db)):
+    existing_coffee = db.query(models.Coffee).filter(models.Coffee.id == coffee_id).first()
+    if not existing_coffee:
+        return {
+        'message': 'coffee not found'
+    }
+    if 'name' in coffee:
+        existing_coffee.name = coffee['name']
+    if 'description' in coffee:
+        existing_coffee.description = coffee['description']
+    if 'price' in coffee:
+        existing_coffee.price = coffee['price']
+    db.commit()
+    db.refresh(existing_coffee)
+    return existing_coffee
+
+@router_v1.delete('/coffees/{coffee_id}')
+async def delete_coffee(coffee_id: int, db: Session = Depends(get_db)):
+    existing_coffee = db.query(models.Coffee).filter(models.Coffee.id == coffee_id).first()
+    if not existing_coffee:
+        return {
+        'message': 'coffee not found'
+    }
+    db.delete(existing_coffee)
+    db.commit()
+    return {"detail": "coffee deleted successfully"}
+
+#orders part
+@router_v1.get('/orders')
+async def get_orders(db: Session = Depends(get_db)):
+    return db.query(models.Order).all()
+
+@router_v1.get('/orders/{order_id}')
+async def get_order(order_id: int, db: Session = Depends(get_db)):
+    return db.query(models.Order).filter(models.Order.id == order_id).first()
+
+@router_v1.post('/orders')
+async def create_order(order: dict, response: Response, db: Session = Depends(get_db)):
+    new_order = models.Order(coffee_id=order['coffee_id'], quantity=order['quantity'], total_price=order['total_price'], notes=order['notes'])
+    db.add(new_order)
+    db.commit()
+    db.refresh(new_order)
+    response.status_code = 201
+    return new_order
+
+@router_v1.patch('/orders/{order_id}')
+async def update_order(response: Response ,order_id: int, order: dict, db: Session = Depends(get_db),):
+    db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if db_order:
+        for key, value in order.items():
+            setattr(db_order, key, value)
+        db.commit()
+        db.refresh(db_order)
+        return db_order
+    else:
+        return response.status_code == 404
+
+@router_v1.delete('/orders/{order_id}')
+async def delete_order(response: Response, order_id: int, db: Session = Depends(get_db)):
+    db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if db_order:
+        db.delete(db_order)
+        db.commit()
+        return {"message": "Order deleted successfully"}
+    else:
+        return response.status_code == 404
 
 
 

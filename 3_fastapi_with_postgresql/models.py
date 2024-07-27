@@ -21,3 +21,19 @@ class Student(Base):
     Std_numid = Column(Integer, index=True)
     birth = Column(String, index=True)
     gender = Column(String, index=True)
+
+class Coffee(Base):
+    __tablename__ = 'coffee'
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    description = Column(String, index=True)
+    price = Column(Integer, index=True)
+
+class Order(Base):
+    __tablename__ = 'orders'
+    id = Column(Integer, primary_key=True, index=True, unique=True, autoincrement=True)
+    coffee_id = Column(Integer, ForeignKey('coffee.id'))
+    quantity = Column(Integer, index=True)
+    total_price = Column(Integer, index=True)
+    notes = Column(String, index=True)
