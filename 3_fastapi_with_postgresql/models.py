@@ -11,6 +11,10 @@ class Book(Base):
     author = Column(String, index=True)
     year = Column(Integer, index=True)
     is_published = Column(Boolean, index=True)
+    detail = Column(String, index=True)
+    synopsis = Column(String, index=True)
+    category = Column(String, index=True)
+
 
 class Student(Base):
     __tablename__ = 'students'
